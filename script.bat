@@ -1,12 +1,12 @@
 echo "Criando as imagens......."
 
-docker build -t davidmonte/projeto-backend:1.0 backend/.
-docker build -t davidmonte/projeto-database:1.0 database/.
+docker build -t davidmonte/projeto-backend:2.0 backend/.
+docker build -t davidmonte/projeto-database:2.0 database/.
 
 echo "Enviando as imagens para o Docker Hub........."
 
-docker push davidmonte/projeto-backend:1.0
-docker push davidmonte/projeto-database:1.0
+docker push davidmonte/projeto-backend:2.0
+docker push davidmonte/projeto-database:2.0
 
 echo "Adionando senha e banco de dados por meio do secret........."
 
