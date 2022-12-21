@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-db
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard-rwo
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - image: davidmonte/projeto-database:2.0
+        name: mysql
+        args:
+        - "--ignore-db-dir=lost+found"
+        imagePullPolicy: Always
+
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: my-secret
+              key: ROOT_PASSWORD
+
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: my-secret
+              key: MYSQL_DATABASE
+        
+        ports:
+        - containerPort: 3306
+          name: mysql
+        
+        volumeMounts:
+        - name: mysql-db
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-db
+        persistentVolumeClaim:
+          claimName: mysql-db
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php
+  labels:
+    app: php
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: php
+  template:
+    metadata:
+      labels:
+        app: php
+    spec:
+      containers:
+      - image: davidmonte/projeto-backend:2.0
+        imagePullPolicy: Always
+        name: php
+        ports:
+        - containerPort: 80
